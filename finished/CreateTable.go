@@ -13,7 +13,6 @@ type SimpleChaincode struct {
 
 }
 
-
 func main() {
 	err := shim.Start(new(SimpleChaincode))
 	if err != nil {
@@ -25,21 +24,38 @@ func main() {
 func (t *SimpleChaincode) Init (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 err := createTableone(stub)
-
+err1 := createTabletwo(stub)
 if err != nil{
+return nil, fmt.Errorf("Error creating table one during init. %s", err)
+}
+if err1 != nil{
 return nil, fmt.Errorf("Error creating table one during init. %s", err)
 }
 return nil, errors.New("Unsupported operation")
 }
 
+func createTabletwo(stub shim.ChaincodeStubInterface) error {
+
+var columnDefsTableTwo []*shim.ColumnDefinition
+
+rollnumber := shim.ColumnDefinition{Name: "colOneTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
+Name := shim.ColumnDefinition{Name: "coltwoTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
+Gender := shim.ColumnDefinition{Name: "colthreeTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
+
+columnDefsTableTwo = append (columnDefsTableTwo, &rollnumber)
+columnDefsTableTwo = append (columnDefsTableTwo, &Name)
+columnDefsTableTwo = append (columnDefsTableTwo, &Gender)
+return stub.CreateTable("tableTwo", columnDefsTableTwo)
+
+}
 
 func createTableone(stub shim.ChaincodeStubInterface) error {
 
 var columnDefsTableOne []*shim.ColumnDefinition
 
 rollnumber := shim.ColumnDefinition{Name: "colOneTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
-Name := shim.ColumnDefinition{Name: "colOneTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
-Gender := shim.ColumnDefinition{Name: "colOneTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
+Name := shim.ColumnDefinition{Name: "colTwoTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
+Gender := shim.ColumnDefinition{Name: "colThreeTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
 
 columnDefsTableOne = append (columnDefsTableOne, &rollnumber)
 columnDefsTableOne = append (columnDefsTableOne, &Name)
@@ -47,8 +63,6 @@ columnDefsTableOne = append (columnDefsTableOne, &Gender)
 return stub.CreateTable("tableOne", columnDefsTableOne)
 
 }
-
-
 
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	switch function {
