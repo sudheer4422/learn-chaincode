@@ -1,125 +1,89 @@
 package main
 
-import(
-
-"fmt"
-"errors"
-"github.com/hyperledger/fabric/core/chaincode/shim"
+import (
+	
+	"fmt"
+	"errors"
+    "github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 
 type SimpleChaincode struct {
-
-
 }
 
-func main() {
+func main(){
+	
 	err := shim.Start(new(SimpleChaincode))
 	if err != nil {
-		fmt.Printf("Error starting Simple chaincode: %s", err)
+		fmt.Printf("sudheer")
+	}	
+}
+
+
+func(t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		return nil, errors.New("expected 1 argument in INIT method")
 	}
-}
-
-
-func (t *SimpleChaincode) Init (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-
-err := createTableone(stub)
-err1 := createTabletwo(stub)
-if err != nil{
-return nil, fmt.Errorf("Error creating table one during init. %s", err)
-}
-if err1 != nil{
-return nil, fmt.Errorf("Error creating table one during init. %s", err)
-}
-return nil, errors.New("Unsupported operation")
-}
-
-func createTabletwo(stub shim.ChaincodeStubInterface) error {
-
-var columnDefsTableTwo []*shim.ColumnDefinition
-
-rollnumber := shim.ColumnDefinition{Name: "colOneTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
-Name := shim.ColumnDefinition{Name: "coltwoTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
-Gender := shim.ColumnDefinition{Name: "colthreeTableTwo",Type: shim.ColumnDefinition_STRING, Key: true}
-
-columnDefsTableTwo = append (columnDefsTableTwo, &rollnumber)
-columnDefsTableTwo = append (columnDefsTableTwo, &Name)
-columnDefsTableTwo = append (columnDefsTableTwo, &Gender)
-return stub.CreateTable("tableTwo", columnDefsTableTwo)
-
-}
-
-func createTableone(stub shim.ChaincodeStubInterface) error {
-
-var columnDefsTableOne []*shim.ColumnDefinition
-
-rollnumber := shim.ColumnDefinition{Name: "colOneTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
-Name := shim.ColumnDefinition{Name: "colTwoTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
-Gender := shim.ColumnDefinition{Name: "colThreeTableOne",Type: shim.ColumnDefinition_STRING, Key: true}
-
-columnDefsTableOne = append (columnDefsTableOne, &rollnumber)
-columnDefsTableOne = append (columnDefsTableOne, &Name)
-columnDefsTableOne = append (columnDefsTableOne, &Gender)
-return stub.CreateTable("tableOne", columnDefsTableOne)
-
-}
-
-func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	switch function {
-                case "getRowTableOne":
-		if len(args) < 1 {
-			return nil, errors.New("getRowTableOne failed. Must include 1 key value")
-		}
-
-		col1Val := args[0]
-		var columns []shim.Column
-		col1 := shim.Column{Value: &shim.Column_String_{String_: col1Val}}
-		columns = append(columns, col1)
-                row, err := stub.GetRow("tableOne", columns)
-		if err != nil {
-			return nil, fmt.Errorf("getRowTableOne operation failed. %s", err)
-		}
-
-		rowString := fmt.Sprintf("%s", row)
-		return []byte(rowString), nil
+	err := stub.PutState("hello world", []byte(args[0]))
+	if err != nil {
+		 return nil, err
 	}
-return nil, errors.New("Unsupported operation")
-	}
-
-
-
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-
-switch function {
-
-       case "insertRowTableOne":
-
-       if len(args) < 3 {
-           return nil, errors.New("insertTableOne failed. Must include 3 column values")
-       }
-       
-       colval1 := args[0]
-       colval2 := args[1]
-       colval3 := args[2]
-
-
-       var columns []*shim.Column
-       col1 :=  shim.Column {Value : &shim.Column_String_{String_: colval1}}
-       col2 :=  shim.Column {Value : &shim.Column_String_{String_: colval2}}
-       col3 :=  shim.Column {Value : &shim.Column_String_{String_: colval3}}
-       columns = append(columns, &col1)
-       columns = append(columns, &col2)
-       columns = append(columns, &col3)
-
-       row := shim.Row{Columns: columns}
-       ok, err := stub.InsertRow("tableOne", row)
-       if err != nil {
-	return nil, fmt.Errorf("insertTableOne operation failed. %s", err)
-	}
-	if !ok {
-	return nil, errors.New("insertTableOne operation failed. Row with given key already exists")
-	}
-	return nil, errors.New("Unsupported operation")
+return nil, nil
 }
-return nil, errors.New("Unsupported operation")
+
+
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
+	
+	if function == "init"{
+		return t.Init(stub, "init", args)
+	}
+	if function == "write"{
+		return t.write(stub, args)
+	}
+	return nil, nil
+}
+
+
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
+	
+	if function == "read"{
+		t.read(stub, args)
+	}
+	return nil, nil
+}
+
+
+func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface,args []string) ([]byte, error){
+	
+	var key,jsonRESP string
+	var err error
+	
+	if len(args) !=1 {
+		
+	} 
+	
+	key = args[0]
+	valAsBytes, err := stub.GetState(key)
+	if err != nil {
+		jsonRESP = "{\"Error\":\"Failed to get state for " + key + "\"}"
+		return nil, errors.New(jsonRESP)
+	}
+	return valAsBytes, nil
+}
+
+func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error){
+	var key, value string
+	var err error
+	
+	if len(args)!=2{
+		return nil, errors.New("2 arg expected in write method")
+	}
+	
+	key = args[0]
+	value = args[1]
+    err = stub.PutState(key, []byte(value))
+    if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
