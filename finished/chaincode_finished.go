@@ -18,6 +18,15 @@ const (
 )
 
 
+type UserRecords []UserRecord
+
+type UserRecord struct {
+	UserId  string `json:"user_id"`
+	UserName string `json:"userName"`
+	Type    string   `json:"type"`
+}
+
+
 func (t *ShoppingCart) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 	
 	var err error
@@ -107,6 +116,36 @@ func (t *ShoppingCart) enroll(stub shim.ChaincodeStubInterface, args []string) (
 }
 
 
+func (t *ShoppingCart) getDeviceServiceRecords(stub shim.ChaincodeStubInterface, userId string) (UserRecords, error) {
+	var columns []shim.Column
+	if userId != "" {
+		col := shim.Column{Value: &shim.Column_String_{String_: userId}}
+		columns = append(columns, col)
+	}
+
+	rowChannel, err := stub.GetRows(userTable, columns)
+	if err != nil {
+		logger.Errorf("Error in getting rows:%s", err.Error())
+		return nil, errors.New("Error in fetching rows")
+	}
+	userRecords := UserRecords{}
+	for row := range rowChannel {
+		userRecord := t.extractServiceRecord(row)
+		userRecords = append(userRecords, userRecord)
+	}
+	return userRecords, nil
+}
+
+
+
+func (t *ShoppingCart) extractServiceRecord(row shim.Row) UserRecord {
+	return UserRecord{
+		UserId:  row.Columns[0].GetString_(),
+		UserName: row.Columns[1].GetString_(),
+		Type: row.Columns[2].GetString_(),
+	}
+}
+
 
 func main() {
 	
@@ -116,3 +155,5 @@ func main() {
 		fmt.Printf("Error starting Energy trading chaincode: %s", err)
 	}
 }
+
+
