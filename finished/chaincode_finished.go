@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"encoding/json"
 )
 
 var logger = shim.NewLogger("Shopping_Cart")
@@ -82,7 +83,9 @@ func (t *ShoppingCart) Invoke(stub shim.ChaincodeStubInterface, function string,
 }
 
 func (t *ShoppingCart) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	
+	if function == "deviceServiceRecords" {
+		return t.deviceServiceRecords(stub, args)
+	}
 	return nil, errors.New("Invalid query function name")
 }
 
@@ -113,6 +116,28 @@ func (t *ShoppingCart) enroll(stub shim.ChaincodeStubInterface, args []string) (
 	logger.Infof("Enrolled device %s", UserId)
 
 	return nil, nil
+}
+
+func (t *ShoppingCart) deviceServiceRecords(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	logger.Info("In deviceServiceRecord function")
+	if len(args) != 1 {
+		logger.Error("Incorrect number of arguments")
+		return nil, errors.New("Incorrect number of arguments. Specify device id.")
+	}
+	userId := args[0]
+	userRecords, err := t.getDeviceServiceRecords(stub, userId)
+	if err != nil {
+		logger.Errorf("Failed fetching device service records: [%s]", err)
+		return nil, fmt.Errorf("Failed fetching device service records [%s]", err)
+	}
+
+	payload, err := json.Marshal(userRecords)
+	if err != nil {
+		logger.Errorf("Failed marshalling payload: [%s]", err)
+		return nil, fmt.Errorf("Failed marshalling payload [%s]", err)
+	}
+
+	return payload, nil
 }
 
 
