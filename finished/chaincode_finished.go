@@ -147,7 +147,6 @@ func (t *ShoppingCart) getDeviceServiceRecords(stub shim.ChaincodeStubInterface,
 		col := shim.Column{Value: &shim.Column_String_{String_: userId}}
 		columns = append(columns, col)
 	}
-
 	rowChannel, err := stub.GetRows(userTable, columns)
 	if err != nil {
 		logger.Errorf("Error in getting rows:%s", err.Error())
@@ -156,6 +155,9 @@ func (t *ShoppingCart) getDeviceServiceRecords(stub shim.ChaincodeStubInterface,
 	userRecords := UserRecords{}
 	for row := range rowChannel {
 		userRecord := t.extractServiceRecord(row)
+		logger.Debug(userRecord.UserName)
+		logger.Debug(userRecord.Type)
+		logger.Debug(userRecord.UserId)
 		userRecords = append(userRecords, userRecord)
 	}
 	return userRecords, nil
@@ -180,5 +182,3 @@ func main() {
 		fmt.Printf("Error starting Energy trading chaincode: %s", err)
 	}
 }
-
-
