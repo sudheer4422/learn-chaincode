@@ -158,6 +158,9 @@ func (t *ShoppingCart) getDeviceServiceRecords(stub shim.ChaincodeStubInterface,
 		logger.Debug(userRecord.UserName)
 		logger.Debug(userRecord.Type)
 		logger.Debug(userRecord.UserId)
+		logger.Infof("username %s", userRecord.UserName)
+		logger.Infof("type %s", userRecord.Type)
+		logger.Infof("userId %s", userRecord.UserId)
 		userRecords = append(userRecords, userRecord)
 	}
 	return userRecords, nil
@@ -170,6 +173,9 @@ func (t *ShoppingCart) extractServiceRecord(row shim.Row) UserRecord {
 		UserId:  row.Columns[0].GetString_(),
 		UserName: row.Columns[1].GetString_(),
 		Type: row.Columns[2].GetString_(),
+		logger.Infof("username %s", UserName)
+		logger.Infof("type %s", Type)
+		logger.Infof("userId %s", UserId)
 	}
 }
 
