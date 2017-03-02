@@ -125,6 +125,7 @@ func (t *ShoppingCart) deviceServiceRecords(stub shim.ChaincodeStubInterface, ar
 		return nil, errors.New("Incorrect number of arguments. Specify device id.")
 	}
 	userId := args[0]
+	logger.Infof("Enrolled device %s", userId)
 	userRecords, err := t.getDeviceServiceRecords(stub, userId)
 	if err != nil {
 		logger.Errorf("Failed fetching device service records: [%s]", err)
@@ -143,6 +144,7 @@ func (t *ShoppingCart) deviceServiceRecords(stub shim.ChaincodeStubInterface, ar
 
 func (t *ShoppingCart) getDeviceServiceRecords(stub shim.ChaincodeStubInterface, userId string) (UserRecords, error) {
 	var columns []shim.Column
+	logger.Info("In getDeviceServiceRecords function")
 	if userId != "" {
 		col := shim.Column{Value: &shim.Column_String_{String_: userId}}
 		columns = append(columns, col)
