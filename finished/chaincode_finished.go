@@ -173,9 +173,7 @@ func (t *ShoppingCart) extractServiceRecord(row shim.Row) UserRecord {
 		UserId:  row.Columns[0].GetString_(),
 		UserName: row.Columns[1].GetString_(),
 		Type: row.Columns[2].GetString_(),
-		logger.Infof("username %s", UserName)
-		logger.Infof("type %s", Type)
-		logger.Infof("userId %s", UserId)
+		
 	}
 }
 
